@@ -1,0 +1,18 @@
+projet multi-module en gradle: 
+	https://docs.gradle.org/current/userguide/multi_project_builds.html
+	https://docs.gradle.org/current/userguide/multi_project_builds.html#sub:real_life_examples
+	https://docs.gradle.org/current/userguide/multi_project_builds.html#sec:project_jar_dependencies
+
+RMI:
+	http://www.enseignement.polytechnique.fr/profs/informatique/Eric.Goubault/Cours05html/poly009.html
+	http://docs.oracle.com/javase/7/docs/technotes/guides/rmi/index.html
+	http://www.darwinsys.com/java/rmi/
+	https://www.javacodegeeks.com/2012/04/spring-remoting-support-and-developing.html
+
+Asynch RMI:
+	http://hwellmann.blogspot.fr/2011/01/transparent-asynchronous-remoting.html
+	http://docs.spring.io/spring-amqp/docs/1.5.5.RELEASE/reference/htmlsingle/#remoting
+	http://docs.spring.io/spring-amqp/docs/1.5.5.RELEASE/reference/htmlsingle/#quick-tour
+
+RabitMQ debian_package for linux:
+	https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v3_6_4/rabbitmq-server_3.6.4-1_all.deb
