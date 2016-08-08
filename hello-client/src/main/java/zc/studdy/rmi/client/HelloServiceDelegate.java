@@ -9,15 +9,28 @@ import zc.studdy.rmi.shared.HelloService;
 import zc.studdy.rmi.shared.HelloServiceCallback;
 
 
+/**
+ * The ServiceDelegate hides the complexity of locating and calling the remote service.
+ *
+ * @author Pascal
+ */
 public class HelloServiceDelegate implements HelloService {
 
 	private HelloService helloService;
 
-	public HelloServiceDelegate(String s) throws MalformedURLException, RemoteException, NotBoundException {
-		String helloServiceUrl = "rmi://localhost:" + parseServicePort(s) + "/callback";
+	public HelloServiceDelegate(int registryPort) throws RuntimeException {
+		String helloServiceUrl = "rmi://localhost:" + String.valueOf(registryPort) + "/callback";
 
-		// find the remote service
-		this.helloService = (HelloService)Naming.lookup(helloServiceUrl);
+		try {
+			// find the remote service
+			this.helloService = (HelloService)Naming.lookup(helloServiceUrl);
+		}
+		catch (MalformedURLException | NotBoundException e) {
+			throw new RuntimeException("not found at the given url: " + helloServiceUrl, e);
+		}
+		catch (RemoteException e) {
+			throw new RuntimeException("not found at the given url: " + helloServiceUrl, e.getCause());
+		}
 	}
 
 	@Override
@@ -35,16 +48,5 @@ public class HelloServiceDelegate implements HelloService {
 		helloService.unregisterCallback(callback);
 	}
 
-	private int parseServicePort(String args) {
-		if (args != null) {
-			try {
-				return Integer.parseInt(args);
-			}
-			catch (NumberFormatException e) {
-			}
-		}
-
-		return 1099;
-	}
 
 }

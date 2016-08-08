@@ -1,23 +1,28 @@
 package zc.studdy.rmi.test;
 
-import java.net.MalformedURLException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
 import zc.studdy.rmi.client.HelloServiceDelegate;
+import zc.studdy.rmi.shared.HelloService;
 import zc.studdy.rmi.shared.HelloServiceCallback;
 
 
 public class ClientMain {
 
-	public static void main(String args[]) throws MalformedURLException, RemoteException, NotBoundException {
-		HelloServiceDelegate delegate = new HelloServiceDelegate(args.length > 0 ? args[0] : null);
+	public static void main(String args[]) throws RemoteException {
+		int servicePort = parseServicePort(args.length > 0 ? args[0] : "");
 
-		System.out.println("Server found, it says: " + delegate.sayHello());
+		// instanciate a ServiceDelegate; That free us to having to locate the service
+		HelloService helloService = new HelloServiceDelegate(servicePort);
 
+		// make a synchronous call
+		System.out.println("Server found, it says: " + helloService.sayHello());
+
+		// then create a Callback to pass to the server for it to call us back asynchronously
 		HelloServiceCallback callback = new MyCallback();
-		delegate.registerCallback(callback);
-		System.out.println("Registered callback.");
+		helloService.registerCallback(callback);
+
+		System.out.println("Just registered the callback.");
 
 		try {
 			Thread.sleep(30 * 1000);
@@ -26,9 +31,18 @@ public class ClientMain {
 			e.printStackTrace();
 		}
 
-		delegate.unregisterCallback(callback);
-		System.out.println("Unregistered callback.");
+		helloService.unregisterCallback(callback);
+		System.out.println("Just unregistered the callback.");
 
 		System.exit(0);
+	}
+
+	private static int parseServicePort(String args) {
+		try {
+			return Integer.parseInt(args);
+		}
+		catch (NumberFormatException e) {
+			return 1099;
+		}
 	}
 }
