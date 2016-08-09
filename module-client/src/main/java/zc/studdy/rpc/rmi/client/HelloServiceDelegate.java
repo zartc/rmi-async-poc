@@ -1,10 +1,9 @@
-package zc.studdy.rmi.client;
+package zc.studdy.rpc.rmi.client;
 
 import java.rmi.RemoteException;
 
-import zc.studdy.rmi.shared.HelloService;
-import zc.studdy.rmi.shared.HelloServiceCallback;
-import zc.studdy.rmi.shared.ServiceLocator;
+import zc.studdy.rpc.rmi.shared.HelloService;
+import zc.studdy.rpc.rmi.shared.ServiceLocator;
 
 
 /**
@@ -25,16 +24,4 @@ public class HelloServiceDelegate implements HelloService {
 	public String sayHello() throws RemoteException {
 		return helloService.sayHello();
 	}
-
-	@Override
-	public void registerCallback(HelloServiceCallback callback) throws RemoteException {
-		helloService.registerCallback(callback);
-	}
-
-	@Override
-	public void unregisterCallback(HelloServiceCallback callback) throws RemoteException {
-		helloService.unregisterCallback(callback);
-	}
-
-
 }

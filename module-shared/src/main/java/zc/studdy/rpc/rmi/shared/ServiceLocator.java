@@ -1,4 +1,4 @@
-package zc.studdy.rmi.shared;
+package zc.studdy.rpc.rmi.shared;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -48,7 +48,7 @@ public class ServiceLocator {
 		return locateService(getHelloServiceUrl());
 	}
 
-	public HelloService locateClockService() {
+	public ClockService locateClockService() {
 		return locateService(getClockServiceUrl());
 	}
 

@@ -1,9 +1,9 @@
-package zc.studdy.rmi.test;
+package zc.studdy.rpc.rmi.test;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import zc.studdy.rmi.shared.HelloServiceCallback;
+import zc.studdy.rpc.rmi.shared.ClockService;
 
 
 /**
@@ -11,7 +11,7 @@ import zc.studdy.rmi.shared.HelloServiceCallback;
  *
  * @author Pascal
  */
-public class MyCallback extends UnicastRemoteObject implements HelloServiceCallback {
+public class MyCallback extends UnicastRemoteObject implements ClockService.Callback {
 	private static final long serialVersionUID = 1L;
 
 	protected MyCallback() throws RemoteException {

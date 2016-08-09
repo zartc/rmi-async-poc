@@ -1,10 +1,10 @@
-package zc.studdy.rmi.test;
+package zc.studdy.rpc.rmi.test;
 
 import java.rmi.RemoteException;
 
-import zc.studdy.rmi.shared.HelloService;
-import zc.studdy.rmi.shared.HelloServiceCallback;
-import zc.studdy.rmi.shared.ServiceLocator;
+import zc.studdy.rpc.rmi.shared.ClockService;
+import zc.studdy.rpc.rmi.shared.HelloService;
+import zc.studdy.rpc.rmi.shared.ServiceLocator;
 
 
 public class ClientMain {
@@ -22,8 +22,9 @@ public class ClientMain {
 		System.out.println("Server found, it says: " + helloService.sayHello());
 
 		// then create a Callback to pass to the server for it to call us back asynchronously
-		HelloServiceCallback callback = new MyCallback();
-		helloService.registerCallback(callback);
+		ClockService.Callback callback = new MyCallback();
+		ClockService clockService = locator.locateClockService();
+		clockService.registerCallback(callback);
 
 		System.out.println("Just registered the callback.");
 
@@ -34,7 +35,7 @@ public class ClientMain {
 			e.printStackTrace();
 		}
 
-		helloService.unregisterCallback(callback);
+		clockService.unregisterCallback(callback);
 		System.out.println("Just unregistered the callback.");
 
 		System.exit(0);
