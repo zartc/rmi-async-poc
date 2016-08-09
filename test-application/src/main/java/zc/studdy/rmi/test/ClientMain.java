@@ -2,9 +2,9 @@ package zc.studdy.rmi.test;
 
 import java.rmi.RemoteException;
 
-import zc.studdy.rmi.client.HelloServiceDelegate;
 import zc.studdy.rmi.shared.HelloService;
 import zc.studdy.rmi.shared.HelloServiceCallback;
+import zc.studdy.rmi.shared.ServiceLocator;
 
 
 public class ClientMain {
@@ -12,8 +12,11 @@ public class ClientMain {
 	public static void main(String args[]) throws RemoteException {
 		int servicePort = parseServicePort(args.length > 0 ? args[0] : "");
 
-		// instanciate a ServiceDelegate; That free us to having to locate the service
-		HelloService helloService = new HelloServiceDelegate(servicePort);
+		// create the locator
+		ServiceLocator locator = new ServiceLocator("localhost", servicePort);
+
+		// and use it to locate the Hello and the Clock services
+		HelloService helloService = locator.locateHelloService();
 
 		// make a synchronous call
 		System.out.println("Server found, it says: " + helloService.sayHello());

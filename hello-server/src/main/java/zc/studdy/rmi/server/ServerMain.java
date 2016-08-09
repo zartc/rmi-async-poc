@@ -11,6 +11,7 @@ import zc.studdy.rmi.server.asynchronous.impl.AsynchronousHelloServiceImpl;
 import zc.studdy.rmi.server.asynchronous.impl.HelloCallbackRegistryImpl;
 import zc.studdy.rmi.server.synchronous.SynchronousHelloService;
 import zc.studdy.rmi.server.synchronous.impl.SynchronousHelloServiceImpl;
+import zc.studdy.rmi.shared.ServiceLocator;
 
 
 /**
@@ -22,11 +23,11 @@ public class ServerMain {
 
 	public static void main(String args[]) throws RemoteException, MalformedURLException {
 		int servicePort = extractServicePort(args);
-		String serviceUrl = computeServiceUrl(servicePort);
+		ServiceLocator locator = new ServiceLocator("localhost", servicePort);
 
 		startRegistry(servicePort);
-		Naming.rebind(serviceUrl, createHelloServerFacade());
-		System.out.println("HelloService ready on: " + serviceUrl);
+		Naming.rebind(locator.getHelloServiceUrl(), createHelloServerFacade());
+		System.out.println("HelloService ready on: " + locator.getHelloServiceUrl());
 	}
 
 	/**
@@ -59,10 +60,6 @@ public class ServerMain {
 		}
 
 		return 1099;
-	}
-
-	private static String computeServiceUrl(int servicePort) {
-		return "rmi://localhost:" + servicePort + "/callback";
 	}
 
 	private static HelloServerFacade createHelloServerFacade() throws RemoteException {

@@ -33,7 +33,7 @@ public class AsynchronousHelloServiceImpl implements Runnable {
 	@Override
 	public void run() {
 		try {
-			System.out.println("HelloService tic");
+			System.out.println("HelloService tic-tac");
 			String dateText = LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME);
 
 			callbackRegistry.forEach(callback -> {
