@@ -1,54 +1,74 @@
 package zc.studdy.rpc.rmi.server.clock.impl;
 
-import java.rmi.RemoteException;
+import java.time.Instant;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import zc.studdy.rpc.rmi.server.clock.ClockClientRegistry;
+import zc.studdy.rpc.rmi.shared.ClockService;
 
 
 /**
- * The implementation of the synchronous ClocService. As you can see it only deal with the
- * calling of the registered callback. The un/registering of the callback proper is
- * handled by the ClockClientRegistry (separation of concern).
+ * The ClockServiceImpl job is to manage the collection of callback registered by clients.
+ * Since clients can un/register at any given time asynchronously even while iteration is
+ * taking place, precautions must be taken to prevent errors and non-deterministic
+ * behavior.
+ * <p>
+ * The ClockServiceImpl also implements the clockTask.Observer interface so that it can
+ * receive clock tickSignals.
  *
  * @author Pascal
  */
-public class ClockServiceImpl implements Runnable {
+public class ClockServiceImpl implements ClockService, ClockTask.Observer {
+	private List<ClockService.Callback> callbacks = Collections.synchronizedList(new ArrayList<>());
 
-	private ClockClientRegistry callbackRegistry;
-	private ScheduledExecutorService executor;
-
-
-	public ClockServiceImpl(ClockClientRegistry callbackRegistry) {
-		this.callbackRegistry = callbackRegistry;
-
-		this.executor = Executors.newScheduledThreadPool(1);
-		this.executor.scheduleAtFixedRate(this, 5, 2, TimeUnit.SECONDS);
+	@Override
+	public void subscribe(ClockService.Callback callback) {
+		synchronized (callbacks) {
+			if (!(callbacks.contains(callback))) {
+				callbacks.add(callback);
+				System.out.println("ClockService.subscribe just registered a new callback. "
+						+ "Now having " + callbacks.size() + " callbacks registered.");
+			}
+		}
 	}
 
 	@Override
-	public void run() {
-		try {
-			System.out.println("HelloService tic-tac");
-			String dateText = LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME);
-
-			callbackRegistry.forEach(callback -> {
-				try {
-					callback.notify("AsynchronousHelloServiceImpl => le bonsoir de " + dateText);
-				}
-				catch (RemoteException e) {
-					e.printStackTrace();
-					throw new RuntimeException("found a DEAD callback");
-				}
-			});
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+	public void unsubscribe(ClockService.Callback callback) {
+		synchronized (callbacks) {
+			if (callbacks.remove(callback)) {
+				System.out.println("ClockService.unsubscribe just unregistered a callback. "
+						+ "Now having " + callbacks.size() + " callbacks left.");
+			}
+			else {
+				System.out.println("ClockService.unsubscribe: callback wasn't registered.");
+			}
 		}
 	}
 
+	@Override
+	public void tickSignal(Instant instant) {
+		System.out.println("ClockService tickSignal");
+
+		LocalTime localTime = instant.atZone(ZoneId.systemDefault()).toLocalTime();
+		String dateText = localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
+		String message = "ClockService tick @ " + dateText;
+
+		synchronized (callbacks) {
+			for (Iterator<ClockService.Callback> iterator = callbacks.iterator(); iterator.hasNext();) {
+				try {
+					iterator.next().notify(message);
+				}
+				catch (Exception e) {
+					iterator.remove();
+					System.out.println("ClockService just detected and removed a DEAD callback. "
+							+ "Now having " + callbacks.size() + " callbacks left.");
+				}
+			}
+		}
+	}
 }

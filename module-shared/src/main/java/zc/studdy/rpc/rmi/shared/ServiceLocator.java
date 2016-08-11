@@ -44,7 +44,7 @@ public class ServiceLocator {
 		return rmiRegistryURL + clockServiceURI;
 	}
 
-	public HelloService locateHelloService() {
+	public GreetingService locateHelloService() {
 		return locateService(getHelloServiceUrl());
 	}
 

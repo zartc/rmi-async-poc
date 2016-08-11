@@ -1,15 +1,16 @@
 package zc.studdy.rpc.rmi.shared;
 
 /**
- * This is a remote interface for illustrating RMI client callback.
+ * The interface of the synchronous Hello service.
  */
-public interface HelloService extends java.rmi.Remote {
+public interface GreetingService extends java.rmi.Remote {
 
 	/**
 	 * A service method that can be called by the client.
 	 *
-	 * @return the hello message.
+	 * @param personName the name of the person to greet
+	 * @return the greeting message.
 	 * @throws java.rmi.RemoteException
 	 */
-	public String sayHello() throws java.rmi.RemoteException;
+	public String computeGreetingMessage(String personName) throws java.rmi.RemoteException;
 }

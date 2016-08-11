@@ -1,6 +1,6 @@
 package zc.studdy.rpc.rmi.server.hello.impl;
 
-import zc.studdy.rpc.rmi.shared.HelloService;
+import zc.studdy.rpc.rmi.shared.GreetingService;
 
 
 /**
@@ -8,12 +8,12 @@ import zc.studdy.rpc.rmi.shared.HelloService;
  *
  * @author Pascal
  */
-public class HelloServiceImpl implements HelloService {
+public class GreetingServiceImpl implements GreetingService {
 
 	private int callerCount = 1;
 
 	@Override
-	public String sayHello() {
-		return ("hello " + callerCount++);
+	public String computeGreetingMessage(String name) {
+		return ("hello " + name + ", you are the " + callerCount++ + " greeted today");
 	}
 }

@@ -3,28 +3,32 @@ package zc.studdy.rpc.rmi.server;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import zc.studdy.rpc.rmi.shared.HelloService;
+import zc.studdy.rpc.rmi.shared.GreetingService;
 
 
 /**
- * The Facade expose the HelloService to the client through the choosen remote access
+ * The Facade expose the Service to the client through the choosen remote access
  * technologie (RMI in this case, but other implementations could be developped : REST,
  * SOAP, JMS, Akka, etc).
  *
  * @author Pascal
  */
-public class HelloServiceFacade extends UnicastRemoteObject implements HelloService {
+public class GreetingServiceFacade extends UnicastRemoteObject implements GreetingService {
 	private static final long serialVersionUID = 1L;
 
-	private HelloService helloService;
+	private GreetingService greetingService;
 
-	protected HelloServiceFacade(HelloService helloService) throws RemoteException {
+	protected GreetingServiceFacade(GreetingService greetingService) throws RemoteException {
 		super();
-		this.helloService = helloService;
+		this.greetingService = greetingService;
 	}
 
 	@Override
-	public String sayHello() throws RemoteException {
-		return helloService.sayHello();
+	public String computeGreetingMessage(String name) throws RemoteException {
+		return greetingService.computeGreetingMessage(name);
+	}
+
+	public GreetingService unwrap() {
+		return greetingService;
 	}
 }
