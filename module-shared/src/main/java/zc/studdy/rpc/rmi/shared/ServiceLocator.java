@@ -3,6 +3,7 @@ package zc.studdy.rpc.rmi.shared;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 
@@ -13,56 +14,77 @@ import java.rmi.RemoteException;
  * @author Pascal
  */
 public class ServiceLocator {
-
+//	@Value("${registryPort}")
 	private int registryPort;
+
+//	@Value("${registryHost}")
 	private String registryHost;
 
-	private String rmiRegistryURL;
-	private String helloServiceURI = "/hello";
+//	@Value("${greetingServicePath}")
+	private String greetingServiceURI = "/greeting";
+
+//	@Value("${clockServicePath}")
 	private String clockServiceURI = "/clock";
 
+	private String rmiRegistryURL;
 
+
+//	@Inject
 	public ServiceLocator(String registryHost, int registryPort) {
 		this.registryPort = registryPort;
 		this.registryHost = registryHost;
 		this.rmiRegistryURL = "rmi://" + registryHost + ":" + String.valueOf(registryPort);
 	}
 
-	public String getRegistryHost() {
-		return registryHost;
+	public void registerGreetingService(Remote service) {
+		registerService(greetingServiceURI, service);
 	}
 
-	public int getRegistryPort() {
-		return registryPort;
+	public void registerClockService(Remote service) {
+		registerService(clockServiceURI, service);
 	}
 
-	public String getHelloServiceUrl() {
-		return rmiRegistryURL + helloServiceURI;
+	private void registerService(String path, Remote service) {
+		if (!path.startsWith("/")) {
+			path = "/" + path;
+		}
+
+		String url = rmiRegistryURL + path;
+
+		try {
+			Naming.rebind(url, service);
+			System.out.println("Service registered on: " + url);
+		}
+		catch (MalformedURLException e) {
+			throw new ServiceLocatorException("unable to register service", e)
+					.addContextValue("url", url);
+		}
+		catch (RemoteException e) {
+			throw new ServiceLocatorException("unable to register service", e.getCause())
+					.addContextValue("url", url);
+		}
 	}
 
-	public String getClockServiceUrl() {
-		return rmiRegistryURL + clockServiceURI;
+	public GreetingService locateGreetingService() throws ServiceLocatorException {
+		return locateService(rmiRegistryURL + greetingServiceURI);
 	}
 
-	public GreetingService locateHelloService() {
-		return locateService(getHelloServiceUrl());
-	}
-
-	public ClockService locateClockService() {
-		return locateService(getClockServiceUrl());
+	public ClockService locateClockService() throws ServiceLocatorException {
+		return locateService(rmiRegistryURL + clockServiceURI);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends java.rmi.Remote> T locateService(String url) {
+	private <T extends java.rmi.Remote> T locateService(String url) throws ServiceLocatorException {
 		try {
-			// find the remote service
 			return (T)Naming.lookup(url);
 		}
 		catch (MalformedURLException | NotBoundException e) {
-			throw new RuntimeException("service not found at the given url: " + url, e);
+			throw new ServiceLocatorException("service not found", e)
+					.addContextValue("url", url);
 		}
 		catch (RemoteException e) {
-			throw new RuntimeException("service not found at the given url: " + url, e.getCause());
+			throw new ServiceLocatorException("service not found", e.getCause())
+					.addContextValue("url", url);
 		}
 	}
 }
