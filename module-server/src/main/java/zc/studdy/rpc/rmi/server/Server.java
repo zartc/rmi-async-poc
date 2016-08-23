@@ -3,13 +3,17 @@ package zc.studdy.rpc.rmi.server;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.concurrent.TimeUnit;
 
-import zc.studdy.rpc.rmi.server.clock.impl.ClockServiceImpl;
-import zc.studdy.rpc.rmi.server.clock.impl.ClockTask;
-import zc.studdy.rpc.rmi.server.clock.impl.ClockTask.Observer;
-import zc.studdy.rpc.rmi.server.hello.impl.GreetingServiceImpl;
-import zc.studdy.rpc.rmi.shared.GreetingService;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+import zc.studdy.rpc.rmi.server.config.ServerProperties;
+import zc.studdy.rpc.rmi.shared.ClockService;
 import zc.studdy.rpc.rmi.shared.ServiceLocator;
 
 
@@ -18,83 +22,55 @@ import zc.studdy.rpc.rmi.shared.ServiceLocator;
  * and start the Server.
  *
  * @author Pascal
+ * @See http://docs.spring.io/spring/docs/current/spring-framework-reference/html/scheduling.html
  */
-public class Server {
+@SpringBootApplication
+@EnableConfigurationProperties(ServerProperties.class)
+@EnableScheduling
+public class Server implements ApplicationRunner {
+
 	private int port;
-	private ServiceLocator locator;
+	private String host;
 
-	public Server(int port, ServiceLocator locator) {
-		this.port = port;
-		this.locator = locator;
+	public Server(ServerProperties serverProperties) {
+		this.host = serverProperties.getHost();
+		this.port = serverProperties.getPort();
 	}
 
-	public void start() throws RemoteException {
-		startRegistry(port);
-
-		// create the HelloServiceFacade and bind it into the RMI registry
-		locator.registerGreetingService(createHelloServiceFacade());
-
-		// create the ClockServiceFacade and bind it into the RMI registry
-		ClockServiceFacade clockService = createClockServiceFacade();
-		locator.registerClockService(clockService);
-
-		// start the asynchronous clock.
-		new ClockTask((Observer)clockService.unwrap(), 5, 5, TimeUnit.SECONDS);
-	}
-
-	private GreetingServiceFacade createHelloServiceFacade() throws RemoteException {
-		GreetingService greetingService = new GreetingServiceImpl();
-		GreetingServiceFacade greetingServiceFacade = new GreetingServiceFacade(greetingService);
-
-		return greetingServiceFacade;
-	}
-
-	private ClockServiceFacade createClockServiceFacade() throws RemoteException {
-		ClockServiceImpl clockService = new ClockServiceImpl();
-		ClockServiceFacade clockServiceFacade = new ClockServiceFacade(clockService);
-
-		return clockServiceFacade;
-	}
-
-	/**
-	 * This method starts a RMI registry on the local host, if it does not already exists
-	 * at the specified port number.
-	 *
-	 * @param port
-	 * @throws RemoteException
-	 */
-	private void startRegistry(int port) throws RemoteException {
-		try {
-			Registry registry = LocateRegistry.getRegistry(port);
-			// This call will throw an exception
-			// if the registry does not already exist
-			registry.list();
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		if ("localhost".equalsIgnoreCase(host)) {
+			// starts a RMI registry on the localhost, if it does not already exists at the specified port number.
+			try {
+				Registry registry = LocateRegistry.getRegistry(port);
+				// This call will throw an exception
+				// if the registry does not already exist
+				registry.list();
+			}
+			catch (RemoteException e) {
+				// No valid registry at that port.
+				LocateRegistry.createRegistry(port);
+			}
 		}
-		catch (RemoteException e) {
-			// No valid registry at that port.
-			LocateRegistry.createRegistry(port);
-		}
+
+		// bind a ClockServiceProxy into the RMI registry
+		serviceLocaltor().registerClockService(new ClockServiceProxy(clockService()));
+	}
+
+	@Bean
+	ServiceLocator serviceLocaltor() {
+		return new ServiceLocator("localhost", port);
+	}
+
+	@Bean
+	ClockService clockService() {
+		return new ClockServiceImpl();
 	}
 
 
 	// ----- MAIN -----
 
 	public static void main(String args[]) throws RemoteException {
-		int servicePort = extractServicePort(args);
-		ServiceLocator locator = new ServiceLocator("localhost", servicePort);
-
-		new Server(servicePort, locator).start();
-	}
-
-	private static int extractServicePort(String args[]) {
-		if (args.length >= 1) {
-			try {
-				return Integer.parseInt(args[0]);
-			}
-			catch (NumberFormatException e) {
-			}
-		}
-
-		return 1099;
+		new SpringApplicationBuilder(Server.class).web(false).run(args);
 	}
 }

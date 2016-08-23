@@ -1,4 +1,4 @@
-package zc.studdy.rpc.rmi.server.clock.impl;
+package zc.studdy.rpc.rmi.server;
 
 import java.time.Instant;
 import java.time.LocalTime;
@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import org.springframework.scheduling.annotation.Scheduled;
 
 import zc.studdy.rpc.rmi.shared.ClockService;
 
@@ -23,7 +25,7 @@ import zc.studdy.rpc.rmi.shared.ClockService;
  *
  * @author Pascal
  */
-public class ClockServiceImpl implements ClockService, ClockTask.Observer {
+public class ClockServiceImpl implements ClockService {
 	private List<ClockService.Callback> callbacks = Collections.synchronizedList(new ArrayList<>());
 
 	@Override
@@ -50,14 +52,14 @@ public class ClockServiceImpl implements ClockService, ClockTask.Observer {
 		}
 	}
 
-	@Override
-	public void tickSignal(Instant instant) {
+	@Scheduled(initialDelayString = "${rmi.server.clock-service.initial-delay}", fixedRateString = "${rmi.server.clock-service.rate}")
+	public void beat() {
 		System.out.println("ClockService tickSignal");
-
-		LocalTime localTime = instant.atZone(ZoneId.systemDefault()).toLocalTime();
+		
+		LocalTime localTime = Instant.now().atZone(ZoneId.systemDefault()).toLocalTime();
 		String dateText = localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
 		String message = "ClockService tick @ " + dateText;
-
+		
 		synchronized (callbacks) {
 			for (Iterator<ClockService.Callback> iterator = callbacks.iterator(); iterator.hasNext();) {
 				try {

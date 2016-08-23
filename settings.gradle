@@ -9,4 +9,7 @@
  * in the user guide at https://docs.gradle.org/2.14/userguide/multi_project_builds.html
  */
 
-include "module-server", "module-client", "module-shared", "module-application"
+include "module-server"
+//include "module-client"
+include "module-shared"
+//include "module-application"
