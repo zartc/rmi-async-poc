@@ -7,18 +7,18 @@ import zc.studdy.rpc.rmi.shared.ClockService;
 
 
 /**
- * The Proxy expose the Service to the client through the choosen remote access
+ * The Adapter class expose the Service to the client through the choosen remote access
  * technologie (RMI in this case, but other implementations could be developped : REST,
  * SOAP, JMS, Akka, etc).
  *
  * @author Pascal
  */
-public class ClockServiceProxy extends UnicastRemoteObject implements ClockService {
+public class ClockServiceAdapter extends UnicastRemoteObject implements ClockService {
 	private static final long serialVersionUID = 1L;
 
 	private ClockService clockService;
 
-	protected ClockServiceProxy(ClockService clockService) throws RemoteException {
+	protected ClockServiceAdapter(ClockService clockService) throws RemoteException {
 		super();
 		this.clockService = clockService;
 	}

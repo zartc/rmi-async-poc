@@ -49,7 +49,7 @@ public class Server implements ApplicationRunner {
 		}
 
 		// bind a ClockServiceProxy into the RMI registry
-		serviceLocaltor().registerClockService(new ClockServiceProxy(clockService()));
+		serviceLocaltor().registerClockService(new ClockServiceAdapter(clockService()));
 	}
 
 	@Bean
