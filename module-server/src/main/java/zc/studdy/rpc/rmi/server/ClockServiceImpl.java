@@ -52,14 +52,14 @@ public class ClockServiceImpl implements ClockService {
 		}
 	}
 
-	@Scheduled(initialDelayString = "${rmi.server.clock-service.initial-delay}", fixedRateString = "${rmi.server.clock-service.rate}")
+	@Scheduled(initialDelayString = "${clock-service.initial-delay}", fixedRateString = "${clock-service.rate}")
 	public void beat() {
 		System.out.println("ClockService tickSignal");
-		
+
 		LocalTime localTime = Instant.now().atZone(ZoneId.systemDefault()).toLocalTime();
 		String dateText = localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
 		String message = "ClockService tick @ " + dateText;
-		
+
 		synchronized (callbacks) {
 			for (Iterator<ClockService.Callback> iterator = callbacks.iterator(); iterator.hasNext();) {
 				try {

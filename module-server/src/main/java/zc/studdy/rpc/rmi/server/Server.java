@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import zc.studdy.rpc.rmi.server.config.ServerProperties;
+import zc.studdy.rpc.rmi.server.config.RmiServerProperties;
 import zc.studdy.rpc.rmi.shared.ClockService;
 import zc.studdy.rpc.rmi.shared.ServiceLocator;
 
@@ -25,26 +25,21 @@ import zc.studdy.rpc.rmi.shared.ServiceLocator;
  * @See http://docs.spring.io/spring/docs/current/spring-framework-reference/html/scheduling.html
  */
 @SpringBootApplication
-@EnableConfigurationProperties(ServerProperties.class)
+@EnableConfigurationProperties
 @EnableScheduling
 public class Server implements ApplicationRunner {
 
-	private int port;
-	private String host;
-
-	public Server(ServerProperties serverProperties) {
-		this.host = serverProperties.getHost();
-		this.port = serverProperties.getPort();
-	}
-
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		if ("localhost".equalsIgnoreCase(host)) {
-			// starts a RMI registry on the localhost, if it does not already exists at the specified port number.
+		RmiServerProperties rmiServerPropertie = rmiServerPropertie();
+
+		if ("localhost".equalsIgnoreCase(rmiServerPropertie.getHost())) {
+			int port = rmiServerPropertie.getPort();
+
 			try {
+				// starts a RMI registry on the localhost, if it does not already exists at the specified port number.
 				Registry registry = LocateRegistry.getRegistry(port);
-				// This call will throw an exception
-				// if the registry does not already exist
+				// This call will throw an exception if the registry does not already exist
 				registry.list();
 			}
 			catch (RemoteException e) {
@@ -59,13 +54,26 @@ public class Server implements ApplicationRunner {
 
 	@Bean
 	ServiceLocator serviceLocaltor() {
-		return new ServiceLocator("localhost", port);
+		RmiServerProperties rmiServerPropertie = rmiServerPropertie();
+		String host = rmiServerPropertie.getHost();
+		int port = rmiServerPropertie.getPort();
+		return new ServiceLocator(host, port);
 	}
 
 	@Bean
 	ClockService clockService() {
 		return new ClockServiceImpl();
 	}
+
+	@Bean
+	public RmiServerProperties rmiServerPropertie() {
+		return new RmiServerProperties();
+	}
+
+//	@Bean
+//	public ClockServiceProperties clockServiceProperties() {
+//		return new ClockServiceProperties();
+//	}
 
 
 	// ----- MAIN -----

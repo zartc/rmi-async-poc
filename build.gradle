@@ -26,27 +26,18 @@ configure(allprojects) {
     apply plugin: 'propdeps-eclipse'
 }
 
+
 subprojects {
 	apply plugin: "java"
 	apply plugin: "eclipse"
-
+	
 	group = "zc.studdy.rpc.rmi"
 	version = "1.0"
 	
 	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
 
 	repositories {
 		mavenCentral()
-	}
-	
-	dependencies {
-		// Declare the dependency for your favourite test framework you want to use in your tests.
-		// TestNG is also supported by the Gradle Test task. Just change the
-		// testCompile dependency to testCompile 'org.testng:testng:6.8.1'
-		// and add 'test.useTestNG()' to your build script.
-		testCompile("junit:junit:4+")
-		optional("org.springframework.boot:spring-boot-configuration-processor:+")
 	}
 	
 	compileJava.dependsOn(processResources)
@@ -66,16 +57,23 @@ project(":module-server") {
 	    compile("org.springframework.boot:spring-boot-starter") 
 	   // compile("org.springframework.boot:spring-boot-starter-actuator")
 	    
+		compile("org.slf4j:slf4j-api")
 		compile("javax.inject:javax.inject:1")
-		compile("org.slf4j:slf4j-api:1.7+")
 
 		compile project(":module-shared")
+		optional("org.springframework.boot:spring-boot-configuration-processor:+")
+		
+		// Declare the dependency for your favourite test framework you want to use in your tests.
+		// TestNG is also supported by the Gradle Test task. Just change the
+		// testCompile dependency to testCompile 'org.testng:testng:6.8.1'
+		// and add 'test.useTestNG()' to your build script.
+		testCompile("junit:junit")
 	}
-	
 }
 
 project(":module-shared") {
 	dependencies {
+		compile("org.slf4j:slf4j-api:1.7+")
 		compile("org.apache.commons:commons-lang3:+")
 	}
 }
