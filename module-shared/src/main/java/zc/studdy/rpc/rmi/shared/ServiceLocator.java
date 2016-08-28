@@ -30,7 +30,7 @@ public class ServiceLocator {
 
 
 	public ServiceLocator(String registryHost, int registryPort) {
-		this.rmiRegistryURL = "rmi://" + registryHost + ":" + String.valueOf(registryPort);
+		this.rmiRegistryURL = "rmi://" + registryHost + ":" + String.valueOf(registryPort) + "/";
 	}
 
 
@@ -52,10 +52,6 @@ public class ServiceLocator {
 
 
 	private void registerService(String path, Remote service) {
-		if (!path.startsWith("/")) {
-			path = "/" + path;
-		}
-
 		String url = rmiRegistryURL + path;
 
 		try {

@@ -10,10 +10,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import zc.studdy.rpc.rmi.server.config.RmiServerProperties;
+import zc.studdy.rpc.rmi.config.RmiServerProperties;
+import zc.studdy.rpc.rmi.server.config.ClockServiceProperties;
+import zc.studdy.rpc.rmi.server.internal.MessageGeneratorSimple;
 import zc.studdy.rpc.rmi.shared.ClockService;
+import zc.studdy.rpc.rmi.shared.GreetingService;
 import zc.studdy.rpc.rmi.shared.ServiceLocator;
 
 
@@ -23,14 +27,27 @@ import zc.studdy.rpc.rmi.shared.ServiceLocator;
  *
  * @author Pascal
  * @See http://docs.spring.io/spring/docs/current/spring-framework-reference/html/scheduling.html
+ * @see http://barakb.github.io/asyncrmi/
  */
 @SpringBootApplication
 @EnableConfigurationProperties
 @EnableScheduling
+@PropertySource("classpath:/rmi-server.properties")
 public class Server implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
+		startRmiServer();
+
+		// bind a ClockService and the GreetingService into the RMI registry
+		serviceLocaltor().registerClockService(clockService());
+		serviceLocaltor().registerGreetingService(greetingService());
+
+		System.out.println("delai = " + clockServiceProperties().getInitialDelay());
+		System.out.println("rate  = " + clockServiceProperties().getRate());
+	}
+
+	private void startRmiServer() throws RemoteException {
 		RmiServerProperties rmiServerPropertie = rmiServerPropertie();
 
 		if ("localhost".equalsIgnoreCase(rmiServerPropertie.getHost())) {
@@ -47,9 +64,16 @@ public class Server implements ApplicationRunner {
 				LocateRegistry.createRegistry(port);
 			}
 		}
+	}
 
-		// bind a ClockServiceProxy into the RMI registry
-		serviceLocaltor().registerClockService(new ClockServiceAdapter(clockService()));
+	@Bean
+	RmiServerProperties rmiServerPropertie() {
+		return new RmiServerProperties();
+	}
+
+	@Bean
+	ClockServiceProperties clockServiceProperties() {
+		return new ClockServiceProperties();
 	}
 
 	@Bean
@@ -61,19 +85,14 @@ public class Server implements ApplicationRunner {
 	}
 
 	@Bean
-	ClockService clockService() {
-		return new ClockServiceImpl();
+	ClockService clockService() throws RemoteException {
+		return new ClockServiceWrapper(new ClockServiceImpl());
 	}
 
 	@Bean
-	public RmiServerProperties rmiServerPropertie() {
-		return new RmiServerProperties();
+	GreetingService greetingService() throws RemoteException {
+		return new GreetingServiceImpl(new MessageGeneratorSimple());
 	}
-
-//	@Bean
-//	public ClockServiceProperties clockServiceProperties() {
-//		return new ClockServiceProperties();
-//	}
 
 
 	// ----- MAIN -----

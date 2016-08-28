@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import zc.studdy.rpc.rmi.shared.ClockService;
@@ -19,22 +21,21 @@ import zc.studdy.rpc.rmi.shared.ClockService;
  * Since clients can un/register at any given time asynchronously even while iteration is
  * taking place, precautions must be taken to prevent errors and non-deterministic
  * behavior.
- * <p>
- * The ClockServiceImpl also implements the clockTask.Observer interface so that it can
- * receive clock tickSignals.
  *
  * @author Pascal
  */
 public class ClockServiceImpl implements ClockService {
-	private List<ClockService.Callback> callbacks = Collections.synchronizedList(new ArrayList<>());
+	private static final Logger log = LoggerFactory.getLogger(ClockServiceImpl.class);
+
+	private final List<ClockService.Callback> callbacks = Collections.synchronizedList(new ArrayList<>());
 
 	@Override
 	public void subscribe(ClockService.Callback callback) {
 		synchronized (callbacks) {
 			if (!(callbacks.contains(callback))) {
 				callbacks.add(callback);
-				System.out.println("ClockService.subscribe just registered a new callback. "
-						+ "Now having " + callbacks.size() + " callbacks registered.");
+				log.info("ClockService.subscribe just registered a new callback. "
+						+ "Now having {} callbacks registered.", callbacks.size());
 			}
 		}
 	}
@@ -43,18 +44,18 @@ public class ClockServiceImpl implements ClockService {
 	public void unsubscribe(ClockService.Callback callback) {
 		synchronized (callbacks) {
 			if (callbacks.remove(callback)) {
-				System.out.println("ClockService.unsubscribe just unregistered a callback. "
-						+ "Now having " + callbacks.size() + " callbacks left.");
+				log.info("ClockService.unsubscribe just unregistered a callback. "
+						+ "Now having {} callbacks left.", callbacks.size());
 			}
 			else {
-				System.out.println("ClockService.unsubscribe: callback wasn't registered.");
+				log.info("ClockService.unsubscribe: callback wasn't registered.");
 			}
 		}
 	}
 
 	@Scheduled(initialDelayString = "${clock-service.initial-delay}", fixedRateString = "${clock-service.rate}")
 	public void beat() {
-		System.out.println("ClockService tickSignal");
+		log.info("ClockService tickSignal");
 
 		LocalTime localTime = Instant.now().atZone(ZoneId.systemDefault()).toLocalTime();
 		String dateText = localTime.format(DateTimeFormatter.ISO_LOCAL_TIME);
@@ -67,8 +68,8 @@ public class ClockServiceImpl implements ClockService {
 				}
 				catch (Exception e) {
 					iterator.remove();
-					System.out.println("ClockService just detected and removed a DEAD callback. "
-							+ "Now having " + callbacks.size() + " callbacks left.");
+					log.info("ClockService just detected and removed a DEAD callback. "
+							+ "Now having {} callbacks left.", callbacks.size());
 				}
 			}
 		}

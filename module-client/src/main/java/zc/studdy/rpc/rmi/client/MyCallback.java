@@ -1,4 +1,4 @@
-package zc.studdy.rpc.rmi.test;
+package zc.studdy.rpc.rmi.client;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

@@ -7,19 +7,19 @@ import zc.studdy.rpc.rmi.shared.ClockService;
 
 
 /**
- * The Adapter class expose the Service to the client through the choosen remote access
- * technologie (RMI in this case, but other implementations could be developped : REST,
- * SOAP, JMS, Akka, etc).
+ * Wrap the ClockService and adapt to the choosen remote access technologie (RMI in this
+ * case, but other implementations could be developped : REST, SOAP, JMS, Akka, etc). That
+ * way, multiple wapper can expose the service class through different remote access
+ * thechnologie while the service class stay unpoluted by these purely technical concerns.
  *
  * @author Pascal
  */
-public class ClockServiceAdapter extends UnicastRemoteObject implements ClockService {
+public class ClockServiceWrapper extends UnicastRemoteObject implements ClockService {
 	private static final long serialVersionUID = 1L;
 
 	private ClockService clockService;
 
-	protected ClockServiceAdapter(ClockService clockService) throws RemoteException {
-		super();
+	protected ClockServiceWrapper(ClockService clockService) throws RemoteException {
 		this.clockService = clockService;
 	}
 

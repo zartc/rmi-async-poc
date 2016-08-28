@@ -40,6 +40,7 @@ subprojects {
 		mavenCentral()
 	}
 	
+	/*
 	compileJava.dependsOn(processResources)
 	
 	eclipse {
@@ -47,20 +48,27 @@ subprojects {
 			defaultOutputDir = file('build/classes/main')
 		}
 	}
+	*/
 }
 
 
 project(":module-server") {
 	apply plugin: "spring-boot"
-	
-    dependencies {
-	    compile("org.springframework.boot:spring-boot-starter") 
-	   // compile("org.springframework.boot:spring-boot-starter-actuator")
+
+  dependencies {
+    compile("org.springframework.boot:spring-boot-starter:1.4.0.RELEASE")  {
+      exclude(module: 'commons-logging')
+    }
+	   
+     // compile("org.springframework.boot:spring-boot-starter-actuator")
 	    
 		compile("org.slf4j:slf4j-api")
 		compile("javax.inject:javax.inject:1")
 
+		compile("com.github.barakb:asyncrmi:1.0.2")
+		
 		compile project(":module-shared")
+		
 		optional("org.springframework.boot:spring-boot-configuration-processor:+")
 		
 		// Declare the dependency for your favourite test framework you want to use in your tests.
@@ -71,23 +79,29 @@ project(":module-server") {
 	}
 }
 
+project(":module-client") {
+	apply plugin: "spring-boot"
+
+	dependencies {
+		compile project(":module-shared")
+		
+    compile("org.springframework.boot:spring-boot-starter:1.4.0.RELEASE")  {
+      exclude(module: 'commons-logging')
+    }
+	    
+		compile("org.slf4j:slf4j-api")
+		compile("javax.inject:javax.inject:1")
+
+		compile("com.github.barakb:asyncrmi:1.0.2")
+	}
+}
+
 project(":module-shared") {
 	dependencies {
-		compile("org.slf4j:slf4j-api:1.7+")
+    compile("org.springframework.boot:spring-boot-starter:1.4.0.RELEASE")  {
+      exclude(module: 'commons-logging')
+    }
+		compile("org.slf4j:slf4j-api")
 		compile("org.apache.commons:commons-lang3:+")
 	}
 }
-
-/*
-project(":module-client") {
-	dependencies {
-		compile project(":module-shared")
-	}
-}
-
-project(":module-application") {
-	dependencies {
-		compile project(":module-client")
-	}
-}
-*/

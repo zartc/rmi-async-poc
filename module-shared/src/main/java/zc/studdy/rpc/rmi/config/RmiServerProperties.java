@@ -1,4 +1,4 @@
-package zc.studdy.rpc.rmi.server.config;
+package zc.studdy.rpc.rmi.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -17,7 +17,7 @@ public class RmiServerProperties {
 	/**
 	 * The RMI port number
 	 */
-	private int port = 1099;
+	private int port;
 
 
 	public String getHost() {
