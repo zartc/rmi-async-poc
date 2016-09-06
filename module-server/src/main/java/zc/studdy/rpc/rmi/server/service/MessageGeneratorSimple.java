@@ -1,4 +1,4 @@
-package zc.studdy.rpc.rmi.server.internal;
+package zc.studdy.rpc.rmi.server.service;
 
 /**
  * The class implementing the methods published by the GreetingService interface.

@@ -4,6 +4,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,8 +16,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import zc.studdy.rpc.rmi.config.RmiServerProperties;
+import zc.studdy.rpc.rmi.server.adapdator.ClockServiceWrapper;
+import zc.studdy.rpc.rmi.server.adapdator.GreetingServiceWrapper;
 import zc.studdy.rpc.rmi.server.config.ClockServiceProperties;
-import zc.studdy.rpc.rmi.server.internal.MessageGeneratorSimple;
+import zc.studdy.rpc.rmi.server.service.ClockServiceImpl;
+import zc.studdy.rpc.rmi.server.service.GreetingServiceImpl;
+import zc.studdy.rpc.rmi.server.service.MessageGeneratorSimple;
 import zc.studdy.rpc.rmi.shared.ClockService;
 import zc.studdy.rpc.rmi.shared.GreetingService;
 import zc.studdy.rpc.rmi.shared.ServiceLocator;
@@ -34,6 +40,7 @@ import zc.studdy.rpc.rmi.shared.ServiceLocator;
 @EnableScheduling
 @PropertySource("classpath:/rmi-server.properties")
 public class Server implements ApplicationRunner {
+	private static final Logger log = LoggerFactory.getLogger(Server.class);
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -43,8 +50,8 @@ public class Server implements ApplicationRunner {
 		serviceLocaltor().registerClockService(clockService());
 		serviceLocaltor().registerGreetingService(greetingService());
 
-		System.out.println("delai = " + clockServiceProperties().getInitialDelay());
-		System.out.println("rate  = " + clockServiceProperties().getRate());
+		log.debug("delai = {}", clockServiceProperties().getInitialDelay());
+		log.debug("rate  = {}", clockServiceProperties().getRate());
 	}
 
 	private void startRmiServer() throws RemoteException {
@@ -91,7 +98,7 @@ public class Server implements ApplicationRunner {
 
 	@Bean
 	GreetingService greetingService() throws RemoteException {
-		return new GreetingServiceImpl(new MessageGeneratorSimple());
+		return new GreetingServiceWrapper(new GreetingServiceImpl(new MessageGeneratorSimple()));
 	}
 
 

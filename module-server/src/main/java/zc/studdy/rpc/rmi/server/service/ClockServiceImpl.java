@@ -1,4 +1,4 @@
-package zc.studdy.rpc.rmi.server;
+package zc.studdy.rpc.rmi.server.service;
 
 import java.time.Instant;
 import java.time.LocalTime;

@@ -1,4 +1,4 @@
-package zc.studdy.rpc.rmi.server;
+package zc.studdy.rpc.rmi.server.adapdator;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -19,7 +19,7 @@ public class ClockServiceWrapper extends UnicastRemoteObject implements ClockSer
 
 	private ClockService clockService;
 
-	protected ClockServiceWrapper(ClockService clockService) throws RemoteException {
+	public ClockServiceWrapper(ClockService clockService) throws RemoteException {
 		this.clockService = clockService;
 	}
 

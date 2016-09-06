@@ -1,10 +1,8 @@
-package zc.studdy.rpc.rmi.server;
+package zc.studdy.rpc.rmi.server.service;
 
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.CompletableFuture;
 
-import zc.studdy.rpc.rmi.server.internal.MessageGenerator;
 import zc.studdy.rpc.rmi.shared.GreetingService;
 
 
@@ -18,9 +16,7 @@ import zc.studdy.rpc.rmi.shared.GreetingService;
  *
  * @author Pascal
  */
-public class GreetingServiceImpl extends UnicastRemoteObject implements GreetingService {
-	private static final long serialVersionUID = 1L;
-
+public class GreetingServiceImpl implements GreetingService {
 	/**
 	 * The MessageGenerator used to compute the greeting message.
 	 */
@@ -34,17 +30,17 @@ public class GreetingServiceImpl extends UnicastRemoteObject implements Greeting
 	 *        compute the greeting message.
 	 * @throws RemoteException
 	 */
-	protected GreetingServiceImpl(MessageGenerator messageGenerator) throws RemoteException {
+	public GreetingServiceImpl(MessageGenerator messageGenerator) {
 		this.messageGenerator = messageGenerator;
 	}
 
 	@Override
-	public String computeGreetingMessage(String personName) throws RemoteException {
+	public String computeGreetingMessage(String personName) {
 		return messageGenerator.generateGreetingMessage(personName);
 	}
 
 	@Override
-	public CompletableFuture<String> computeGreetingMessageAsync(String personName) throws RemoteException {
+	public CompletableFuture<String> computeGreetingMessageAsync(String personName) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				Thread.sleep(30 * 1000);
